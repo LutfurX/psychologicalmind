@@ -6,7 +6,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, AssessmentResult, UserResponse } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+// ✅ FIXED: Vite env ব্যবহার
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+if (!apiKey) {
+  throw new Error("API key missing! Check Vercel environment variables.");
+}
+
+const ai = new GoogleGenAI({ apiKey });
 
 export const generateInitialQuestions = async (categoryName: string): Promise<Question[]> => {
   const response = await ai.models.generateContent({
