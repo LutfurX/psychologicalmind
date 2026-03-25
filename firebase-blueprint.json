@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and performance statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User's full name" },
+        "email": { "type": "string", "format": "email", "description": "User's email" },
+        "photoURL": { "type": "string", "description": "User's profile picture URL" },
+        "phoneNumber": { "type": "string", "description": "User's mobile number" },
+        "dateOfBirth": { "type": "string", "format": "date", "description": "User's date of birth" },
+        "address": { "type": "string", "description": "User's physical address" },
+        "totalTests": { "type": "integer", "description": "Total number of tests taken" },
+        "averageScore": { "type": "number", "description": "Average score across all tests" },
+        "lastTestDate": { "type": "string", "format": "date-time", "description": "Date of the most recent test" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "TestResult": {
+      "title": "Test Result",
+      "description": "A record of a completed test",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user who took the test" },
+        "category": { "type": "string", "description": "Test category (e.g., Math, Science)" },
+        "score": { "type": "integer", "description": "Score achieved in the test" },
+        "totalQuestions": { "type": "integer", "description": "Total number of questions in the test" },
+        "correctAnswers": { "type": "integer", "description": "Number of correct answers" },
+        "timeSpent": { "type": "integer", "description": "Time spent in seconds" },
+        "completedAt": { "type": "string", "format": "date-time", "description": "When the test was finished" }
+      },
+      "required": ["userId", "category", "score", "completedAt"]
+    },
+    "Recommendation": {
+      "title": "Recommendation",
+      "description": "AI-generated study tip or recommendation",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user" },
+        "content": { "type": "string", "description": "The recommendation text" },
+        "type": { "type": "string", "enum": ["study_tip", "weak_area", "encouragement"], "description": "Type of recommendation" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the recommendation was generated" }
+      },
+      "required": ["userId", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/test_results/{resultId}": {
+      "schema": "TestResult",
+      "description": "Test history records"
+    },
+    "/recommendations/{recId}": {
+      "schema": "Recommendation",
+      "description": "AI-generated recommendations"
+    }
+  }
+}

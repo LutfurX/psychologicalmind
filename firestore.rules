@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (UID)
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - displayName: string (optional) - User's full name
+    //   - email: string (required, email format) - User's email
+    //   - photoURL: string (optional) - Profile picture URL
+    //   - totalTests: integer (optional) - Total number of tests taken
+    //   - averageScore: number (optional) - Average score
+    //   - lastTestDate: string (optional, date-time) - Last test timestamp
+    //   - createdAt: string (required, date-time) - Account creation timestamp
+    //
+    // Collection: test_results
+    // Document ID: resultId (auto-generated)
+    // Fields:
+    //   - userId: string (required) - UID of the user
+    //   - category: string (required) - Test category
+    //   - score: integer (required) - Score achieved
+    //   - totalQuestions: integer (required) - Total questions
+    //   - correctAnswers: integer (required) - Correct answers
+    //   - timeSpent: integer (required) - Time in seconds
+    //   - completedAt: string (required, date-time) - Completion timestamp
+    //
+    // Collection: recommendations
+    // Document ID: recId (auto-generated)
+    // Fields:
+    //   - userId: string (required) - UID of the user
+    //   - content: string (required) - The recommendation text
+    //   - type: string (required, enum) - Type of recommendation
+    //   - createdAt: string (required, date-time) - Creation timestamp
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidDateTime(dateTime) {
+      return dateTime is string && dateTime.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             isValidDateTime(data.createdAt);
+    }
+
+    function isValidTestResult(data) {
+      return data.keys().hasAll(['userId', 'category', 'score', 'completedAt']) &&
+             data.userId == request.auth.uid &&
+             data.score is int &&
+             isValidDateTime(data.completedAt);
+    }
+
+    function isValidRecommendation(data) {
+      return data.keys().hasAll(['userId', 'content', 'type', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.content is string &&
+             data.type in ['study_tip', 'weak_area', 'encouragement'] &&
+             isValidDateTime(data.createdAt);
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow delete: if false; // Users cannot delete their profiles
+    }
+
+    match /test_results/{resultId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidTestResult(request.resource.data);
+      allow update: if false; // Test results are immutable
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /recommendations/{recId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidRecommendation(request.resource.data);
+      allow update: if false; // Recommendations are immutable
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

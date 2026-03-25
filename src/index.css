@@ -1,6 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-fg);
+  --color-primary: var(--primary);
+}
+
+@layer base {
+  :root {
+    --bg: #F8F9FA;
+    --fg: #1A1A1A;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --muted: #F3F4F6;
+    --muted-fg: #6B7280;
+    --primary: #1A1A1A;
+  }
+
+  .dark {
+    --bg: #0a0a0a;
+    --fg: #f5f5f5;
+    --card: #171717;
+    --border: #262626;
+    --muted: #262626;
+    --muted-fg: #a3a3a3;
+    --primary: #f5f5f5;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

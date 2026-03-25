@@ -27,6 +27,7 @@ export interface AssessmentResult {
   behavioralInsights: string;
   potentialConcerns: string;
   recommendations: string[];
+  suggestedTests?: string[];
 }
 
 export interface UserResponse {
